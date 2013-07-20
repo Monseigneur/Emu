@@ -45,6 +45,19 @@ public class CPU {
     flagH = true;
     flagC = true;
   }
+  
+  /* PC methods */
+  public void incPC(int val) {
+    pc += val;
+  }
+  
+  public int getPC() {
+    return pc;
+  }
+  
+  public void changePC(int newPC) {
+    pc = newPC;
+  }
  
   /*
   // Flag methods

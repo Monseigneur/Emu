@@ -7,17 +7,21 @@
 
 public class Memory {
   private ROM rom;
+  private ROMClock clock;
   
   private boolean ramRTCEnable;
   private int romBankNum;
   private int ramBankRTCRegNum;
+  private int prevRTCWrite;
   
-  public Memory(ROM r) {
+  public Memory(ROM r, ROMClock c) {
     rom = r;
+    clock = c;
     
     ramRTCEnable = false;
     romBankNum = 0x1;     // cannot choose bank 0, since it is already bound
     ramBankRTCRegNum = 0x0;
+    prevRTCWrite = 0;
   }
   
   public int readMem(int offset) {
@@ -30,8 +34,13 @@ public class Memory {
     } else if (offset < 0xa000) {
       // video ram (READ?)
     } else if (offset < 0xc000) {
-      // external ram RW
-      
+      // external ram 
+      if (ramBankRTCRegNum <= 0x3) {
+        // Reading ram bank
+        throw new UnsupportedOperationException("NYI");
+      } else {
+        return clock.latchedClock[ramBankRTCRegNum - 0x8];
+      }
     } else if (offset < 0xd000) {
       // work ram bank 0
     } else if (offset < 0xe000) {
@@ -79,8 +88,11 @@ public class Memory {
         throw new IllegalArgumentException("Invalid parameter to ram bank number");
       }
     } else if (offset < 0x8000) {
-      // ROM / RAM mode select
-      
+      // Clock latching, need to write 0 then 1
+      if (prevRTCWrite == 0x0 && val == 0x1) {
+        clock.latchClock();
+      }
+      prevRTCWrite = val;
     }
   }
   

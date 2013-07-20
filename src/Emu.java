@@ -9,10 +9,12 @@ public class Emu {
   private ROM rom;
   private CPU cpu;
   private Memory mem;
+  private ROMClock clock;
   
   public Emu(String name) {
     rom = new ROM(name);
-    mem = new Memory(rom);
+    clock = new ROMClock(System.currentTimeMillis());
+    mem = new Memory(rom, clock);
     cpu = new CPU();
     
     

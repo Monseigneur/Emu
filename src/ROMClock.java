@@ -16,7 +16,7 @@
          Bit 7  Day Counter Carry Bit (1=Counter Overflow)
  */
 
-public class Clock {
+public class ROMClock {
   private static final int CLOCK_REG_NUM = 4;
   
   public int[] latchedClock;
@@ -25,15 +25,17 @@ public class Clock {
   private boolean overflow;
   private long lastTime;
   
-  public Clock(long startTime) {
+  public ROMClock(long startTime) {
     clockData = new int[CLOCK_REG_NUM];
     latchedClock = new int[CLOCK_REG_NUM + 1];
     
     overflow = false;
     lastTime = startTime;
+    System.out.println("S:" + lastTime);
   }
   
   public void updateClock(long time) {
+    System.out.println("U:" + time);
     long diff = time - lastTime;
     lastTime = time;
     
@@ -52,6 +54,15 @@ public class Clock {
     if (overflow) {
       latchedClock[4] |= 0x80;
     }
+  }
+  
+  public void reset() {
+    lastTime = System.currentTimeMillis();
+    clockData = new int[CLOCK_REG_NUM];
+  }
+  
+  public String toString() {
+    return "(" + overflow + ") " + clockData[3] + ":" + clockData[2] + ":" + clockData[1] + ":" + clockData[0];
   }
   
   private void rolloverClock() {

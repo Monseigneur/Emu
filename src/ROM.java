@@ -54,7 +54,7 @@ public class ROM {
     if (tempRomSize >= 0x0 && tempRomSize <= 0x7) {
       romSize = (1 << 15) << tempRomSize;
     } else {
-      throw new IllegalArgumentException("other rom sizes not supported yet");
+      throw new UnsupportedOperationException("other rom sizes not supported yet");
     }
     
     int tempRamSize = (int) romData[0x149];

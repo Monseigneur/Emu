@@ -2,6 +2,7 @@
  * 
  * @author milanj91
  *
+ * The GBC CPU
  */
 
 public class CPU {

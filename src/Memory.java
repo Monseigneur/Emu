@@ -2,7 +2,7 @@
  * 
  * @author milanj91
  * 
- * MBC3 only
+ * Representing the GBC memory space (supports MBC3 only currently)
  */
 
 public class Memory {
@@ -10,17 +10,14 @@ public class Memory {
   
   private boolean ramRTCEnable;
   private int romBankNum;
-  private int romBankHighBits;
-  private int ramBankNum;
-  private boolean ramBankMode;
+  private int ramBankRTCRegNum;
   
-  public Memory(String romName) {
-    rom = new ROM(romName);
+  public Memory(ROM r) {
+    rom = r;
     
-    ramRTCEnable = false; // TODO
-    romBankNum = 1;
-    romBankHighBits = 0;
-    ramBankMode = false;
+    ramRTCEnable = false;
+    romBankNum = 0x1;     // cannot choose bank 0, since it is already bound
+    ramBankRTCRegNum = 0x0;
   }
   
   public int readMem(int offset) {
@@ -29,12 +26,7 @@ public class Memory {
       return rom.readMem(offset);
     } else if (offset < 0x8000) {
       // switchable rom bank R
-      int highBits = 0x0;
-      if (!ramBankMode) {
-        highBits = ramBankNum << 5;
-      }
-      int newOffset = (romBankNum | highBits) * 0x4000 + offset;
-      return rom.readMem(newOffset);
+      return rom.readMem(romBankNum * 0x4000 + (offset - 0x4000));
     } else if (offset < 0xa000) {
       // video ram (READ?)
     } else if (offset < 0xc000) {
@@ -63,38 +55,32 @@ public class Memory {
   public void writeMem(int val, int offset) {
     if (offset < 0x2000) {
       // Ram enable
-      if (val == 0) {
+      if (val == 0x0) {
         ramRTCEnable = false;
       } else if (val == 0xa) {
         ramRTCEnable = true;
       } else {
-        throw new IllegalArgumentException("Invalid value to ram enable"); // TODO
+        throw new IllegalArgumentException("Invalid parameter to ram / RTC enable");
       }
     } else if (offset < 0x4000) {
       // ROM bank number
-      if (val == 0x0 && ramBankMode) {
-        romBankNum = 1;
-      } else if (val >= 0x0 && val <= 0x1f){
+      if (val == 0x0) {
+        romBankNum = 0x1;
+      } else if (val > 0x0 && val <= 0x7f) {
         romBankNum = val;
       } else {
-        throw new IllegalArgumentException("Invalid value for rom bank");
+        throw new IllegalArgumentException("Invalid parameter to rom bank number");
       }
     } else if (offset < 0x6000) {
-      // RAM Bank Number - or - Upper Bits of ROM Bank Number
-      if (val >= 0 && val < 4) {
-        ramBankNum = val;
+      // RAM Bank Number
+      if ((val >= 0x0 && val <= 0x3) || (val >= 0x8 && val <= 0xc)) {
+        ramBankRTCRegNum = val;
       } else {
-        throw new IllegalArgumentException("Illegal value for ram bank num / rom bank num high bits");
+        throw new IllegalArgumentException("Invalid parameter to ram bank number");
       }
     } else if (offset < 0x8000) {
       // ROM / RAM mode select
-      if (val == 0) {
-        ramBankMode = false;
-      } else if (val == 1) {
-        ramBankMode = true;
-      } else {
-        throw new IllegalArgumentException("Invalid valud for rom / ram mode");
-      }
+      
     }
   }
   

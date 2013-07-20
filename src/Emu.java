@@ -2,17 +2,17 @@
  * 
  * @author milanj91
  *
- * A gameboy color emulator
+ * A GBC emulator
  */
 
 public class Emu {
-  //private ROM rom;
+  private ROM rom;
   private CPU cpu;
   private Memory mem;
-  //private int[] memSpace;
   
   public Emu(String name) {
-    mem = new Memory(name);
+    rom = new ROM(name);
+    mem = new Memory(rom);
     cpu = new CPU();
     
     

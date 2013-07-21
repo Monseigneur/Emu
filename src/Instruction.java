@@ -339,8 +339,9 @@ public class Instruction {
   }
   
   // 26 LD H,d8 [- - - -]
-  public static void ldHd8() {
-    throw new UnsupportedOperationException();
+  public static void ldHd8(CPU cpu, Memory mem) {
+    cpu.H = mem.readMem(cpu.getPC() + 1) & 0xff;
+    cpu.incPC(INSTR_LEN[0x26]);
   }
   
   // 27 DAA [Z - 0 C]
@@ -349,8 +350,16 @@ public class Instruction {
   }
   
   // 28 JR Z,r8 [- - - -]
-  public static void jrZr8() {
-    throw new UnsupportedOperationException();
+  public static void jrZr8(CPU cpu, Memory mem) {
+    if (cpu.flagZ) {
+      int offset = mem.readMem(cpu.getPC() + 1) & 0xff;
+      if ((offset & 0x80) != 0) {
+        offset |= 0xffffff00;   // Should make the value negative so the JR works appropriately TODO
+      }
+      cpu.incPC(offset);
+    } else {
+      cpu.incPC(INSTR_LEN[0x28]);
+    }
   }
   
   // 29 ADD HL,HL [- 0 H C]
@@ -380,7 +389,7 @@ public class Instruction {
   
   // 2C INC L [Z 0 H -]
   public static void incL(CPU cpu) {
-    cpu.L++;
+    cpu.L = (cpu.L + 1) & 0xff;
     cpu.flagZ = (cpu.L == 0);
     cpu.flagN = false;
     cpu.flagH = ((cpu.L & 0xff) == 0);
@@ -389,7 +398,7 @@ public class Instruction {
   
   // 2D DEC L [Z 1 H -]
   public static void decL(CPU cpu) {
-    cpu.L--;
+    cpu.L = (cpu.L - 1) & 0xff;
     cpu.flagZ = (cpu.L == 0);
     cpu.flagN = true;
     cpu.flagH = ((cpu.L & 0x0f) == 0x0f);
@@ -411,13 +420,22 @@ public class Instruction {
   }
   
   // 30 JR NC,r8 [- - - -]
-  public static void jrNCr8() {
-    throw new UnsupportedOperationException();
+  public static void jrNCr8(CPU cpu, Memory mem) {
+    if (!cpu.flagC) {
+      int offset = mem.readMem(cpu.getPC() + 1) & 0xff;
+      if ((offset & 0x80) != 0) {
+        offset |= 0xffffff00;   // Should make the value negative so the JR works appropriately TODO
+      }
+      cpu.incPC(offset);
+    } else {
+      cpu.incPC(INSTR_LEN[0x30]);
+    }
   }
   
   // 31 LD SP,d16 [- - - -]
   public static void ldSPd16(CPU cpu, Memory mem) {
     cpu.sp = (mem.readMem(cpu.getPC() + 1) & 0xff) | ((mem.readMem(cpu.getPC() + 2) & 0xff) << 8);
+    cpu.incPC(INSTR_LEN[0x31]); // TODO
   }
   
   // 32 LD (HL-),A [- - - -]
@@ -455,8 +473,16 @@ public class Instruction {
   }
   
   // 38 JR C,r8 [- - - -]
-  public static void jrCr8() {
-    throw new UnsupportedOperationException();
+  public static void jrCr8(CPU cpu, Memory mem) {
+    if (cpu.flagC) {
+      int offset = mem.readMem(cpu.getPC() + 1) & 0xff;
+      if ((offset & 0x80) != 0) {
+        offset |= 0xffffff00;   // Should make the value negative so the JR works appropriately TODO
+      }
+      cpu.incPC(offset);
+    } else {
+      cpu.incPC(INSTR_LEN[0x30]);
+    }
   }
   
   // 39 ADD HL,SP [- 0 H C]
@@ -478,7 +504,7 @@ public class Instruction {
   
   // 3B DEC SP [- - - -]
   public static void decSP(CPU cpu) {
-    cpu.sp = (cpu.sp - 1) & 0xff;
+    cpu.sp = (cpu.sp - 1) & 0xffff;
     cpu.incPC(INSTR_LEN[0x3b]);
   }
   
@@ -549,8 +575,10 @@ public class Instruction {
   }
   
   // 46 LD B,(HL) [- - - -]
-  public static void ldBaHL(CPU cpu) {
-    throw new UnsupportedOperationException();
+  public static void ldBaHL(CPU cpu, Memory mem) {
+    int addr = (cpu.H << 8) | cpu.L;
+    cpu.B = mem.readMem(addr) & 0xff;
+    cpu.incPC(INSTR_LEN[0x46]);
   }
   
   // 47 LD B,A [- - - -]
@@ -596,8 +624,10 @@ public class Instruction {
   }
   
   // 4E LD C,(HL) [- - - -]
-  public static void ldCaHL() {
-    throw new UnsupportedOperationException();
+  public static void ldCaHL(CPU cpu, Memory mem) {
+    int addr = (cpu.H << 8) | cpu.L;
+    cpu.C = mem.readMem(addr) & 0xff;
+    cpu.incPC(INSTR_LEN[0x4e]);
   }
   
   // 4F LD C,A [- - - -]
@@ -643,8 +673,10 @@ public class Instruction {
   }
   
   // 56 LD D,(HL) [- - - -]
-  public static void ldDaHL(CPU cpu) {
-    throw new UnsupportedOperationException();
+  public static void ldDaHL(CPU cpu, Memory mem) {
+    int addr = (cpu.H << 8) | cpu.L;
+    cpu.D = mem.readMem(addr) & 0xff;
+    cpu.incPC(INSTR_LEN[0x56]);
   }
   
   // 57 LD D,A [- - - -]
@@ -690,8 +722,10 @@ public class Instruction {
   }
   
   // 5E LD E,(HL) [- - - -]
-  public static void ldEaHL(CPU cpu) {
-    throw new UnsupportedOperationException();
+  public static void ldEaHL(CPU cpu, Memory mem) {
+    int addr = (cpu.H << 8) | cpu.L;
+    cpu.E = mem.readMem(addr) & 0xff;
+    cpu.incPC(INSTR_LEN[0x5e]);
   }
   
   // 5F LD E,A [- - - -]
@@ -737,8 +771,10 @@ public class Instruction {
   }
   
   // 66 LD H,(HL) [- - - -]
-  public static void ldHaHL(CPU cpu) {
-    throw new UnsupportedOperationException();
+  public static void ldHaHL(CPU cpu, Memory mem) {
+    int addr = (cpu.H << 8) | cpu.L;
+    cpu.H = mem.readMem(addr) & 0xff;
+    cpu.incPC(INSTR_LEN[0x66]);
   }
   
   // 67 LD H,A [- - - -]
@@ -784,8 +820,10 @@ public class Instruction {
   }
   
   // 6E LD L,(HL) [- - - -]
-  public static void ldLaHL(CPU cpu) {
-    throw new UnsupportedOperationException();
+  public static void ldLaHL(CPU cpu, Memory mem) {
+    int addr = (cpu.H << 8) | cpu.L;
+    cpu.L = mem.readMem(addr) & 0xff;
+    cpu.incPC(INSTR_LEN[0x6e]);
   }
   
   // 6F LD L,A [- - - -]
@@ -871,8 +909,10 @@ public class Instruction {
   }
   
   // 7E LD A,(HL) [- - - -]
-  public static void ldAaHL(CPU cpu) {
-    throw new UnsupportedOperationException();
+  public static void ldAaHL(CPU cpu, Memory mem) {
+    int addr = (cpu.H << 8) | cpu.L;
+    cpu.A = mem.readMem(addr) & 0xff;
+    cpu.incPC(INSTR_LEN[0x7e]);
   }
   
   // 7F LD A,A [- - - -]
@@ -948,8 +988,15 @@ public class Instruction {
   }
   
   // 86 ADD A,(HL) [- - - -]
-  public static void addAaHL(CPU cpu) {
-    throw new UnsupportedOperationException();
+  public static void addAaHL(CPU cpu, Memory mem) {
+    int val = mem.readMem((cpu.H << 8) | cpu.L) & 0xff;
+    int res = cpu.A + val;
+    cpu.flagH = (cpu.A & 0x0f) + (val & 0x0f) > 0x0f;
+    cpu.A = res & 0xff;
+    cpu.flagZ = (cpu.A == 0);
+    cpu.flagN = false;
+    cpu.flagC = res > 0xff;
+    cpu.incPC(INSTR_LEN[0x86]);
   }
   
   // 87 ADD A,A [- - - -]
@@ -1036,8 +1083,16 @@ public class Instruction {
   }
   
   // 8E ADC A,(HL) [Z 0 H C]
-  public static void adcAaHL(CPU cpu) {
-    throw new UnsupportedOperationException();
+  public static void adcAaHL(CPU cpu, Memory mem) {
+    int val = mem.readMem((cpu.H << 8) | cpu.L) & 0xff;
+    int carry = cpu.flagC ? 1 : 0;
+    int res = cpu.A + val + carry;
+    cpu.flagH = (cpu.A & 0x0f) + (val & 0x0f) + carry > 0x0f;
+    cpu.A = res & 0xff;
+    cpu.flagZ = (cpu.A == 0);
+    cpu.flagN = false;
+    cpu.flagC = res > 0xff;
+    cpu.incPC(INSTR_LEN[0x8e]);
   }
   
   // 8F ADC A,A [Z 0 H C]
@@ -1119,8 +1174,15 @@ public class Instruction {
   }
   
   // 96 SUB (HL) [Z 1 H C]
-  public static void subaHL(CPU cpu) {
-    throw new UnsupportedOperationException();
+  public static void subaHL(CPU cpu, Memory mem) {
+    int val = mem.readMem((cpu.H << 8) | cpu.L) & 0xff;
+    int res = cpu.A - val;
+    cpu.flagZ = (res == 0);
+    cpu.flagH = (cpu.A & 0x0f) < (val & 0x0f);
+    cpu.flagN = true;
+    cpu.flagC = (res < 0);
+    cpu.A = res;
+    cpu.incPC(INSTR_LEN[0x96]);
   }
   
   // 97 SUB A [Z 1 H C]
@@ -1206,8 +1268,16 @@ public class Instruction {
   }
   
   // 9E SBC A,(HL) [Z 1 H C]
-  public static void sbcAaHL(CPU cpu) {
-    throw new UnsupportedOperationException();
+  public static void sbcAaHL(CPU cpu, Memory mem) {
+    int val = mem.readMem((cpu.H << 8) | cpu.L) & 0xff;
+    int carry = cpu.flagC ? 1 : 0;
+    int res = cpu.A - val - carry;
+    cpu.flagZ = (res == 0);
+    cpu.flagH = (cpu.A & 0x0f) - (val & 0x0f) - carry < 0;
+    cpu.flagN = true;
+    cpu.flagC = (res < 0);
+    cpu.A = res;
+    cpu.incPC(INSTR_LEN[0x9e]);
   }
   
   // 9F SBC A,A [Z 1 H C]
@@ -1288,8 +1358,14 @@ public class Instruction {
   }
   
   // A6 AND (HL) [Z 0 1 0]
-  public static void andaHL(CPU cpu) {
-    throw new UnsupportedOperationException();
+  public static void andaHL(CPU cpu, Memory mem) {
+    int val = mem.readMem((cpu.H << 8) | cpu.L) & 0xff;
+    cpu.A &= val;
+    cpu.flagZ = (cpu.A == 0);
+    cpu.flagN = false;
+    cpu.flagH = true;
+    cpu.flagC = false;
+    cpu.incPC(INSTR_LEN[0xa6]);
   }
   
   // A7 AND A [Z 0 1 0]
@@ -1361,9 +1437,15 @@ public class Instruction {
     cpu.incPC(INSTR_LEN[0xad]);
   }
   
-  // A8 XOR (HL) [Z 0 0 0]
-  public static void xoraHL(CPU cpu) {
-    throw new UnsupportedOperationException();
+  // AE XOR (HL) [Z 0 0 0]
+  public static void xoraHL(CPU cpu, Memory mem) {
+    int val = mem.readMem((cpu.H << 8) | cpu.L) & 0xff;
+    cpu.A ^= val;
+    cpu.flagZ = (cpu.A == 0);
+    cpu.flagN = false;
+    cpu.flagH = false;
+    cpu.flagC = false;
+    cpu.incPC(INSTR_LEN[0xae]);
   }
   
   // AF XOR A [Z 0 0 0]
@@ -1437,7 +1519,14 @@ public class Instruction {
   }
   
   // B6 OR (HL) [Z 0 0 0]
-  public static void oraHL(CPU cpu) {
+  public static void oraHL(CPU cpu, Memory mem) {
+    int val = mem.readMem((cpu.H << 8) | cpu.L) & 0xff;
+    cpu.A |= val;
+    cpu.flagZ = (cpu.A == 0);
+    cpu.flagN = false;
+    cpu.flagH = false;
+    cpu.flagC = false;
+    cpu.incPC(INSTR_LEN[0xb5]);
     throw new UnsupportedOperationException();
   }
   
@@ -1464,7 +1553,7 @@ public class Instruction {
   public static void cpC(CPU cpu) {
     int res = cpu.A - cpu.C;
     cpu.flagZ = (res == 0);
-    cpu.flagH = (cpu.A & 0x0f) < (cpu.B & 0x0f);
+    cpu.flagH = (cpu.A & 0x0f) < (cpu.C & 0x0f);
     cpu.flagN = true;
     cpu.flagC = (res < 0);
     cpu.incPC(INSTR_LEN[0xb9]);
@@ -1474,7 +1563,7 @@ public class Instruction {
   public static void cpD(CPU cpu) {
     int res = cpu.A - cpu.D;
     cpu.flagZ = (res == 0);
-    cpu.flagH = (cpu.A & 0x0f) < (cpu.B & 0x0f);
+    cpu.flagH = (cpu.A & 0x0f) < (cpu.D & 0x0f);
     cpu.flagN = true;
     cpu.flagC = (res < 0);
     cpu.incPC(INSTR_LEN[0xba]);
@@ -1484,7 +1573,7 @@ public class Instruction {
   public static void cpE(CPU cpu) {
     int res = cpu.A - cpu.E;
     cpu.flagZ = (res == 0);
-    cpu.flagH = (cpu.A & 0x0f) < (cpu.B & 0x0f);
+    cpu.flagH = (cpu.A & 0x0f) < (cpu.E & 0x0f);
     cpu.flagN = true;
     cpu.flagC = (res < 0);
     cpu.incPC(INSTR_LEN[0xbb]);
@@ -1494,7 +1583,7 @@ public class Instruction {
   public static void cpH(CPU cpu) {
     int res = cpu.A - cpu.H;
     cpu.flagZ = (res == 0);
-    cpu.flagH = (cpu.A & 0x0f) < (cpu.B & 0x0f);
+    cpu.flagH = (cpu.A & 0x0f) < (cpu.H & 0x0f);
     cpu.flagN = true;
     cpu.flagC = (res < 0);
     cpu.incPC(INSTR_LEN[0xbc]);
@@ -1504,15 +1593,21 @@ public class Instruction {
   public static void cpL(CPU cpu) {
     int res = cpu.A - cpu.L;
     cpu.flagZ = (res == 0);
-    cpu.flagH = (cpu.A & 0x0f) < (cpu.B & 0x0f);
+    cpu.flagH = (cpu.A & 0x0f) < (cpu.L & 0x0f);
     cpu.flagN = true;
     cpu.flagC = (res < 0);
     cpu.incPC(INSTR_LEN[0xbd]);
   }
   
   // BE CP (HL) [Z 1 H C]
-  public static void cpaHL(CPU cpu) {
-    throw new UnsupportedOperationException();
+  public static void cpaHL(CPU cpu, Memory mem) {
+    int val = mem.readMem((cpu.H << 8) | cpu.L) & 0xff;
+    int res = cpu.A - val;
+    cpu.flagZ = (res == 0);
+    cpu.flagH = (cpu.A & 0x0f) < (val & 0x0f);
+    cpu.flagN = true;
+    cpu.flagC = (res < 0);
+    cpu.incPC(INSTR_LEN[0xbe]);
   }
   
   // BF CP A [Z 1 H C]
@@ -1535,8 +1630,13 @@ public class Instruction {
   }
   
   // C2 JP NZ,a16 [- - - -]
-  public static void jpNZa16() {
-    throw new UnsupportedOperationException();
+  public static void jpNZa16(CPU cpu, Memory mem) {
+    if (!cpu.flagZ) {
+      int addr = (mem.readMem(cpu.getPC() + 1) & 0xff) | ((mem.readMem(cpu.getPC() + 2) & 0xff) << 8);
+      cpu.changePC(addr);
+    } else {
+      cpu.incPC(INSTR_LEN[0xc2]);
+    }
   }
   
   // C3 JP a16 [- - - -]
@@ -1556,8 +1656,15 @@ public class Instruction {
   }
   
   // C6 ADD A,d8 [Z 0 H C]
-  public static void addAd8(CPU cpu) {
-    throw new UnsupportedOperationException();
+  public static void addAd8(CPU cpu, Memory mem) {
+    int val = mem.readMem(cpu.getPC() + 1) & 0xff;
+    int res = cpu.A + val;
+    cpu.flagH = (cpu.A & 0x0f) + (val & 0x0f) > 0x0f;
+    cpu.A = res & 0xff;
+    cpu.flagZ = (cpu.A == 0);
+    cpu.flagN = false;
+    cpu.flagC = res > 0xff;
+    cpu.incPC(INSTR_LEN[0xc6]);
   }
   
   // C7 RST 00H [- - - -]
@@ -1576,8 +1683,13 @@ public class Instruction {
   }
   
   // CA JP Z,a16 [- - - -]
-  public static void jpZa16() {
-    throw new UnsupportedOperationException();
+  public static void jpZa16(CPU cpu, Memory mem) {
+    if (cpu.flagZ) {
+      int addr = (mem.readMem(cpu.getPC() + 1) & 0xff) | ((mem.readMem(cpu.getPC() + 2) & 0xff) << 8);
+      cpu.changePC(addr);
+    } else {
+      cpu.incPC(INSTR_LEN[0xca]);
+    }
   }
   
   // CB PREFIX CB [- - - -]
@@ -1597,8 +1709,16 @@ public class Instruction {
   }
   
   // CE ADC A,d8 [Z 0 H C]
-  public static void adcAd8() {
-    throw new UnsupportedOperationException();
+  public static void adcAd8(CPU cpu, Memory mem) {
+    int val = mem.readMem(cpu.getPC() + 1) & 0xff;
+    int carry = cpu.flagC ? 1 : 0;
+    int res = cpu.A + val + carry;
+    cpu.flagH = (cpu.A & 0x0f) + (val & 0x0f) + carry > 0x0f;
+    cpu.A = res & 0xff;
+    cpu.flagZ = (cpu.A == 0);
+    cpu.flagN = false;
+    cpu.flagC = res > 0xff;
+    cpu.incPC(INSTR_LEN[0xce]);
   }
   
   // CF RST 08H [- - - -]
@@ -1617,8 +1737,13 @@ public class Instruction {
   }
   
   // D2 JP NC,a16 [- - - -]
-  public static void jpNCa16() {
-    throw new UnsupportedOperationException();
+  public static void jpNCa16(CPU cpu, Memory mem) {
+    if (!cpu.flagC) {
+      int addr = (mem.readMem(cpu.getPC() + 1) & 0xff) | ((mem.readMem(cpu.getPC() + 2) & 0xff) << 8);
+      cpu.changePC(addr);
+    } else {
+      cpu.incPC(INSTR_LEN[0xd2]);
+    }
   }
   
   // D3 DOES NOT EXIST
@@ -1634,8 +1759,15 @@ public class Instruction {
   }
   
   // D6 SUB d8 [Z 1 H C]
-  public static void subd8() {
-    throw new UnsupportedOperationException();
+  public static void subd8(CPU cpu, Memory mem) {
+    int val = mem.readMem(cpu.getPC() + 1) & 0xff;
+    int res = cpu.A - val;
+    cpu.flagZ = (res == 0);
+    cpu.flagH = (cpu.A & 0x0f) < (val & 0x0f);
+    cpu.flagN = true;
+    cpu.flagC = (res < 0);
+    cpu.A = res;
+    cpu.incPC(INSTR_LEN[0xd6]);
   }
   
   // D7 RST 10H [- - - -]
@@ -1654,8 +1786,13 @@ public class Instruction {
   }
   
   // DA JP C,a16 [- - - -]
-  public static void jpCa16() {
-    throw new UnsupportedOperationException();
+  public static void jpCa16(CPU cpu, Memory mem) {
+    if (cpu.flagC) {
+      int addr = (mem.readMem(cpu.getPC() + 1) & 0xff) | ((mem.readMem(cpu.getPC() + 2) & 0xff) << 8);
+      cpu.changePC(addr);
+    } else {
+      cpu.incPC(INSTR_LEN[0xda]);
+    }
   }
   
   // DB DOES NOT EXIST
@@ -1668,8 +1805,16 @@ public class Instruction {
   // DD DOES NOT EXIST
   
   // DE SBC A,d8 [Z 1 H C]
-  public static void sbcAd8(CPU cpu) {
-    throw new UnsupportedOperationException();
+  public static void sbcAd8(CPU cpu, Memory mem) {
+    int val = mem.readMem(cpu.getPC() + 1) & 0xff;
+    int carry = cpu.flagC ? 1 : 0;
+    int res = cpu.A - val - carry;
+    cpu.flagZ = (res == 0);
+    cpu.flagH = (cpu.A & 0x0f) - (val & 0x0f) - carry < 0;
+    cpu.flagN = true;
+    cpu.flagC = (res < 0);
+    cpu.A = res;
+    cpu.incPC(INSTR_LEN[0xde]);
   }
   
   // DF RST 18H [- - - -]
@@ -1678,8 +1823,10 @@ public class Instruction {
   }
   
   // E0 LDH (a8),A [- - - -]
-  public static void ldha8A() {
-    throw new UnsupportedOperationException();
+  public static void ldha8A(CPU cpu, Memory mem) {
+    int addr = (mem.readMem(cpu.getPC() + 1) & 0xff) | 0xff00;
+    mem.writeMem(cpu.A & 0xff, addr);
+    cpu.incPC(INSTR_LEN[0xe0]);
   }
   
   // E1 POP HL [- - - -]
@@ -1688,8 +1835,10 @@ public class Instruction {
   }
   
   // E2 LD (C),A [- - - -]
-  public static void ldaCA() {
-    throw new UnsupportedOperationException();
+  public static void ldaCA(CPU cpu, Memory mem) {
+    int addr = 0xff00 | (cpu.C & 0xff);
+    mem.writeMem(cpu.A & 0xff, addr);
+    cpu.incPC(INSTR_LEN[0xe2]);
   }
   
   // E3 DOES NOT EXIST
@@ -1702,8 +1851,14 @@ public class Instruction {
   }
   
   // E6 AND d8 [Z 0 1 0]
-  public static void andd8() {
-    throw new UnsupportedOperationException();
+  public static void andd8(CPU cpu, Memory mem) {
+    int val = mem.readMem(cpu.getPC() + 1) & 0xff;
+    cpu.A &= val;
+    cpu.flagZ = (cpu.A == 0);
+    cpu.flagN = false;
+    cpu.flagH = true;
+    cpu.flagC = false;
+    cpu.incPC(INSTR_LEN[0xe6]);
   }
   
   // E7 RST 20H [- - - -]
@@ -1712,18 +1867,28 @@ public class Instruction {
   }
   
   // E8 ADD SP,r8 [0 0 H C]
-  public static void addSPr8() {
-    throw new UnsupportedOperationException();
+  public static void addSPr8(CPU cpu, Memory mem) {
+    int val = mem.readMem(cpu.getPC() + 1) & 0xff;
+    int res = cpu.sp + val;
+    cpu.flagH = (cpu.sp & 0x0f) + (val & 0x0f) > 0x0f;
+    cpu.A = res & 0xff;
+    cpu.flagZ = false;
+    cpu.flagN = false;
+    cpu.flagC = res > 0xff;
+    cpu.incPC(INSTR_LEN[0xe8]);
   }
   
   // E9 JP (HL) [- - - -]
-  public static void jpaHL() {
-    throw new UnsupportedOperationException();
+  public static void jpaHL(CPU cpu) {
+    int addr = ((cpu.H & 0xff) << 8) | (cpu.L & 0xff);
+    cpu.changePC(addr);
   }
   
   // EA LD (a16),A [- - - -]
-  public static void lda16A() {
-    throw new UnsupportedOperationException();
+  public static void lda16A(CPU cpu, Memory mem) {
+    int addr = (mem.readMem(cpu.getPC() + 1) & 0xff) | ((mem.readMem(cpu.getPC() + 2) & 0xff) << 8);
+    mem.writeMem(cpu.A & 0xff, addr);
+    cpu.incPC(INSTR_LEN[0xea]);
   }
   
   // EB DOES NOT EXIST
@@ -1733,8 +1898,14 @@ public class Instruction {
   // ED DOES NOT EXIST
   
   // EE XOR d8 [Z 0 0 0]
-  public static void xord8(CPU cpu) {
-    throw new UnsupportedOperationException();
+  public static void xord8(CPU cpu, Memory mem) {
+    int val = mem.readMem(cpu.getPC() + 1) & 0xff;
+    cpu.A ^= val;
+    cpu.flagZ = (cpu.A == 0);
+    cpu.flagN = false;
+    cpu.flagH = false;
+    cpu.flagC = false;
+    cpu.incPC(INSTR_LEN[0xee]);
   }
   
   // EF RST 28H [- - - -]
@@ -1743,8 +1914,10 @@ public class Instruction {
   }
   
   // F0 LDH A,(a8) [- - - -]
-  public static void ldhAa8() {
-    throw new UnsupportedOperationException();
+  public static void ldhAa8(CPU cpu, Memory mem) {
+    int addr = (mem.readMem(cpu.getPC() + 1) & 0xff) | 0xff00;
+    cpu.A = mem.readMem(addr) & 0xff;
+    cpu.incPC(INSTR_LEN[0xf0]);
   }
   
   // F1 POP AF [Z N H C]
@@ -1753,8 +1926,10 @@ public class Instruction {
   }
   
   // F2 LD A,(C) [- - - -]
-  public static void ldAaC() {
-    throw new UnsupportedOperationException();
+  public static void ldAaC(CPU cpu, Memory mem) {
+    int addr = (cpu.C & 0xff) | 0xff00;
+    cpu.A = mem.readMem(addr) & 0xff;
+    cpu.incPC(INSTR_LEN[0xf2]);
   }
   
   // F3 DI [- - - -]
@@ -1770,8 +1945,14 @@ public class Instruction {
   }
   
   // F6 OR d8 [Z 0 0 0]
-  public static void ord8() {
-    throw new UnsupportedOperationException();
+  public static void ord8(CPU cpu, Memory mem) {
+    int val = mem.readMem(cpu.getPC() + 1) & 0xff;
+    cpu.A |= val;
+    cpu.flagZ = (cpu.A == 0);
+    cpu.flagN = false;
+    cpu.flagH = false;
+    cpu.flagC = false;
+    cpu.incPC(INSTR_LEN[0xf6]);
   }
   
   // F7 RST 30H [- - - -]
@@ -1780,18 +1961,20 @@ public class Instruction {
   }
   
   // F8 LD HL,SP+r8 [0 0 H C]
-  public static void ldHLSPr8() {
+  public static void ldHLSPr8(CPU cpu) {
     throw new UnsupportedOperationException();
   }
   
   // F9 LD SP,HL [- - - -]
-  public static void ldSPHL() {
-    throw new UnsupportedOperationException();
+  public static void ldSPHL(CPU cpu, Memory mem) {
+    cpu.sp = ((cpu.H & 0xff) << 8) | (cpu.L & 0xff);
+    cpu.incPC(INSTR_LEN[0xf9]);
   }
   
   // FA LD A,(a16) [- - - -]
-  public static void ldAa16() {
-    throw new UnsupportedOperationException();
+  public static void ldAa16(CPU cpu, Memory mem) {
+    int addr = (mem.readMem(cpu.getPC() + 1) & 0xff) | ((mem.readMem(cpu.getPC() + 2) & 0xff) << 8);
+    cpu.A = mem.readMem(addr) & 0xff;
   }
   
   // FB EI [- - - -]
@@ -1804,8 +1987,14 @@ public class Instruction {
   // FD DOES NOT EXIST
   
   // FE CP d8 [Z 1 H C]
-  public static void cpd8() {
-    throw new UnsupportedOperationException();
+  public static void cpd8(CPU cpu, Memory mem) {
+    int val = mem.readMem(cpu.getPC() + 1) & 0xff;
+    int res = cpu.A - val;
+    cpu.flagZ = (res == 0);
+    cpu.flagH = (cpu.A & 0x0f) < (val & 0x0f);
+    cpu.flagN = true;
+    cpu.flagC = (res < 0);
+    cpu.incPC(INSTR_LEN[0xfe]);
   }
   
   // FF RST 38H [- - - -]
@@ -1867,9 +2056,9 @@ public class Instruction {
     else if (opcode == 0x23) { Instruction.incHL(cpu); }
     else if (opcode == 0x24) { Instruction.incH(cpu); }
     else if (opcode == 0x25) { Instruction.decH(cpu); }
-    else if (opcode == 0x26) { Instruction.ldHd8(); }
+    else if (opcode == 0x26) { Instruction.ldHd8(cpu, mem); }
     else if (opcode == 0x27) { Instruction.daA(); }
-    else if (opcode == 0x28) { Instruction.jrZr8(); }
+    else if (opcode == 0x28) { Instruction.jrZr8(cpu, mem); }
     else if (opcode == 0x29) { Instruction.addHLHL(cpu); }
     else if (opcode == 0x2a) { Instruction.ldAaHLI(); }
     else if (opcode == 0x2b) { Instruction.decHL(cpu); }
@@ -1878,7 +2067,7 @@ public class Instruction {
     else if (opcode == 0x2e) { Instruction.ldLd8(cpu, mem); }
     else if (opcode == 0x2f) { Instruction.cpl(cpu); }
     
-    else if (opcode == 0x30) { Instruction.jrNCr8(); }
+    else if (opcode == 0x30) { Instruction.jrNCr8(cpu, mem); }
     else if (opcode == 0x31) { Instruction.ldSPd16(cpu, mem); }
     else if (opcode == 0x32) { Instruction.ldaHLDA(); }
     else if (opcode == 0x33) { Instruction.incSP(cpu); }
@@ -1886,7 +2075,7 @@ public class Instruction {
     else if (opcode == 0x35) { Instruction.decaHL(cpu); }
     else if (opcode == 0x36) { Instruction.ldaHLd8(); }
     else if (opcode == 0x37) { Instruction.scf(cpu); }
-    else if (opcode == 0x38) { Instruction.jrCr8(); }
+    else if (opcode == 0x38) { Instruction.jrCr8(cpu, mem); }
     else if (opcode == 0x39) { Instruction.addHLSP(cpu); }
     else if (opcode == 0x3a) { Instruction.ldAaHLD(); }
     else if (opcode == 0x3b) { Instruction.decSP(cpu); }
@@ -1901,7 +2090,7 @@ public class Instruction {
     else if (opcode == 0x43) { Instruction.ldBE(cpu); }
     else if (opcode == 0x44) { Instruction.ldBH(cpu); }
     else if (opcode == 0x45) { Instruction.ldBL(cpu); }
-    else if (opcode == 0x46) { Instruction.ldBaHL(cpu); }
+    else if (opcode == 0x46) { Instruction.ldBaHL(cpu, mem); }
     else if (opcode == 0x47) { Instruction.ldBA(cpu); }
     else if (opcode == 0x48) { Instruction.ldCB(cpu); }
     else if (opcode == 0x49) { Instruction.ldCC(cpu); }
@@ -1909,7 +2098,7 @@ public class Instruction {
     else if (opcode == 0x4b) { Instruction.ldCE(cpu); }
     else if (opcode == 0x4c) { Instruction.ldCH(cpu); }
     else if (opcode == 0x4d) { Instruction.ldCL(cpu); }
-    else if (opcode == 0x4e) { Instruction.ldCaHL(); }
+    else if (opcode == 0x4e) { Instruction.ldCaHL(cpu, mem); }
     else if (opcode == 0x4f) { Instruction.ldCA(cpu); }
     
     else if (opcode == 0x50) { Instruction.ldDB(cpu); }
@@ -1918,7 +2107,7 @@ public class Instruction {
     else if (opcode == 0x53) { Instruction.ldDE(cpu); }
     else if (opcode == 0x54) { Instruction.ldDH(cpu); }
     else if (opcode == 0x55) { Instruction.ldDL(cpu); }
-    else if (opcode == 0x56) { Instruction.ldDaHL(cpu); }
+    else if (opcode == 0x56) { Instruction.ldDaHL(cpu, mem); }
     else if (opcode == 0x57) { Instruction.ldDA(cpu); }
     else if (opcode == 0x58) { Instruction.ldEB(cpu); }
     else if (opcode == 0x59) { Instruction.ldEC(cpu); }
@@ -1926,7 +2115,7 @@ public class Instruction {
     else if (opcode == 0x5b) { Instruction.ldEE(cpu); }
     else if (opcode == 0x5c) { Instruction.ldEH(cpu); }
     else if (opcode == 0x5d) { Instruction.ldEL(cpu); }
-    else if (opcode == 0x5e) { Instruction.ldEaHL(cpu); }
+    else if (opcode == 0x5e) { Instruction.ldEaHL(cpu, mem); }
     else if (opcode == 0x5f) { Instruction.ldEA(cpu); }
     
     else if (opcode == 0x60) { Instruction.ldHB(cpu); }
@@ -1935,7 +2124,7 @@ public class Instruction {
     else if (opcode == 0x63) { Instruction.ldHE(cpu); }
     else if (opcode == 0x64) { Instruction.ldHH(cpu); }
     else if (opcode == 0x65) { Instruction.ldHL(cpu); }
-    else if (opcode == 0x66) { Instruction.ldHaHL(cpu); }
+    else if (opcode == 0x66) { Instruction.ldHaHL(cpu, mem); }
     else if (opcode == 0x67) { Instruction.ldHA(cpu); }
     else if (opcode == 0x68) { Instruction.ldLB(cpu); }
     else if (opcode == 0x69) { Instruction.ldLC(cpu); }
@@ -1943,7 +2132,7 @@ public class Instruction {
     else if (opcode == 0x6b) { Instruction.ldLE(cpu); }
     else if (opcode == 0x6c) { Instruction.ldLH(cpu); }
     else if (opcode == 0x6d) { Instruction.ldLL(cpu); }
-    else if (opcode == 0x6e) { Instruction.ldLaHL(cpu); }
+    else if (opcode == 0x6e) { Instruction.ldLaHL(cpu, mem); }
     else if (opcode == 0x6f) { Instruction.ldLA(cpu); }
     
     else if (opcode == 0x70) { Instruction.ldaHLB(cpu); }
@@ -1960,7 +2149,7 @@ public class Instruction {
     else if (opcode == 0x7b) { Instruction.ldAE(cpu); }
     else if (opcode == 0x7c) { Instruction.ldAH(cpu); }
     else if (opcode == 0x7d) { Instruction.ldAL(cpu); }
-    else if (opcode == 0x7e) { Instruction.ldAaHL(cpu); }
+    else if (opcode == 0x7e) { Instruction.ldAaHL(cpu, mem); }
     else if (opcode == 0x7f) { Instruction.ldAA(cpu); }
     
     else if (opcode == 0x80) { Instruction.addAB(cpu); }
@@ -1969,7 +2158,7 @@ public class Instruction {
     else if (opcode == 0x83) { Instruction.addAE(cpu); }
     else if (opcode == 0x84) { Instruction.addAH(cpu); }
     else if (opcode == 0x85) { Instruction.addAL(cpu); }
-    else if (opcode == 0x86) { Instruction.addAaHL(cpu); }
+    else if (opcode == 0x86) { Instruction.addAaHL(cpu, mem); }
     else if (opcode == 0x87) { Instruction.addAA(cpu); }
     else if (opcode == 0x88) { Instruction.adcAB(cpu); }
     else if (opcode == 0x89) { Instruction.adcAC(cpu); }
@@ -1977,7 +2166,7 @@ public class Instruction {
     else if (opcode == 0x8b) { Instruction.adcAE(cpu); }
     else if (opcode == 0x8c) { Instruction.adcAH(cpu); }
     else if (opcode == 0x8d) { Instruction.adcAL(cpu); }
-    else if (opcode == 0x8e) { Instruction.adcAaHL(cpu); }
+    else if (opcode == 0x8e) { Instruction.adcAaHL(cpu, mem); }
     else if (opcode == 0x8f) { Instruction.adcAA(cpu); }
     
     else if (opcode == 0x90) { Instruction.subB(cpu); }
@@ -1986,7 +2175,7 @@ public class Instruction {
     else if (opcode == 0x93) { Instruction.subE(cpu); }
     else if (opcode == 0x94) { Instruction.subH(cpu); }
     else if (opcode == 0x95) { Instruction.subL(cpu); }
-    else if (opcode == 0x96) { Instruction.subaHL(cpu); }
+    else if (opcode == 0x96) { Instruction.subaHL(cpu, mem); }
     else if (opcode == 0x97) { Instruction.subA(cpu); }
     else if (opcode == 0x98) { Instruction.sbcAB(cpu); }
     else if (opcode == 0x99) { Instruction.sbcAC(cpu); }
@@ -1994,7 +2183,7 @@ public class Instruction {
     else if (opcode == 0x9b) { Instruction.sbcAE(cpu); }
     else if (opcode == 0x9c) { Instruction.sbcAH(cpu); }
     else if (opcode == 0x9d) { Instruction.sbcAL(cpu); }
-    else if (opcode == 0x9e) { Instruction.sbcAaHL(cpu); }
+    else if (opcode == 0x9e) { Instruction.sbcAaHL(cpu, mem); }
     else if (opcode == 0x9f) { Instruction.sbcAA(cpu); }
     
     else if (opcode == 0xa0) { Instruction.andB(cpu); }
@@ -2003,7 +2192,7 @@ public class Instruction {
     else if (opcode == 0xa3) { Instruction.andE(cpu); }
     else if (opcode == 0xa4) { Instruction.andH(cpu); }
     else if (opcode == 0xa5) { Instruction.andL(cpu); }
-    else if (opcode == 0xa6) { Instruction.andaHL(cpu); }
+    else if (opcode == 0xa6) { Instruction.andaHL(cpu, mem); }
     else if (opcode == 0xa7) { Instruction.andA(cpu); }
     else if (opcode == 0xa8) { Instruction.xorB(cpu); }
     else if (opcode == 0xa9) { Instruction.xorC(cpu); }
@@ -2011,7 +2200,7 @@ public class Instruction {
     else if (opcode == 0xab) { Instruction.xorE(cpu); }
     else if (opcode == 0xac) { Instruction.xorH(cpu); }
     else if (opcode == 0xad) { Instruction.xorL(cpu); }
-    else if (opcode == 0xae) { Instruction.xoraHL(cpu); }
+    else if (opcode == 0xae) { Instruction.xoraHL(cpu, mem); }
     else if (opcode == 0xaf) { Instruction.xorA(cpu); }
     
     else if (opcode == 0xb0) { Instruction.orB(cpu); }
@@ -2020,7 +2209,7 @@ public class Instruction {
     else if (opcode == 0xb3) { Instruction.orE(cpu); }
     else if (opcode == 0xb4) { Instruction.orH(cpu); }
     else if (opcode == 0xb5) { Instruction.orL(cpu); }
-    else if (opcode == 0xb6) { Instruction.oraHL(cpu); }
+    else if (opcode == 0xb6) { Instruction.oraHL(cpu, mem); }
     else if (opcode == 0xb7) { Instruction.orA(cpu); }
     else if (opcode == 0xb8) { Instruction.cpB(cpu); }
     else if (opcode == 0xb9) { Instruction.cpC(cpu); }
@@ -2028,75 +2217,75 @@ public class Instruction {
     else if (opcode == 0xbb) { Instruction.cpE(cpu); }
     else if (opcode == 0xbc) { Instruction.cpH(cpu); }
     else if (opcode == 0xbd) { Instruction.cpL(cpu); }
-    else if (opcode == 0xbe) { Instruction.cpaHL(cpu); }
+    else if (opcode == 0xbe) { Instruction.cpaHL(cpu, mem); }
     else if (opcode == 0xbf) { Instruction.cpA(cpu); }
     
     else if (opcode == 0xc0) { Instruction.retNZ(); }
     else if (opcode == 0xc1) { Instruction.popBC(cpu); }
-    else if (opcode == 0xc2) { Instruction.jpNZa16(); }
+    else if (opcode == 0xc2) { Instruction.jpNZa16(cpu, mem); }
     else if (opcode == 0xc3) { Instruction.jpa16(cpu, mem); }
     else if (opcode == 0xc4) { Instruction.callNZa16(); }
     else if (opcode == 0xc5) { Instruction.pushBC(cpu); }
-    else if (opcode == 0xc6) { Instruction.addAd8(cpu); }
+    else if (opcode == 0xc6) { Instruction.addAd8(cpu, mem); }
     else if (opcode == 0xc7) { Instruction.rst00(); }
     else if (opcode == 0xc8) { Instruction.retZ(); }
     else if (opcode == 0xc9) { Instruction.ret(); }
-    else if (opcode == 0xca) { Instruction.jpZa16(); }
+    else if (opcode == 0xca) { Instruction.jpZa16(cpu, mem); }
     else if (opcode == 0xcb) { Instruction.preCB(); } // TODO
     else if (opcode == 0xcc) { Instruction.callZa16(); }
     else if (opcode == 0xcd) { Instruction.calla16(); }
-    else if (opcode == 0xce) { Instruction.adcAd8(); }
+    else if (opcode == 0xce) { Instruction.adcAd8(cpu, mem); }
     else if (opcode == 0xcf) { Instruction.rst08(); }
     
     else if (opcode == 0xd0) { Instruction.retNC(); }
     else if (opcode == 0xd1) { Instruction.popDE(cpu); }
-    else if (opcode == 0xd2) { Instruction.jpNCa16(); }
+    else if (opcode == 0xd2) { Instruction.jpNCa16(cpu, mem); }
     else if (opcode == 0xd3) { throw new UnsupportedOperationException("Invalid opcode 0xd3"); }
     else if (opcode == 0xd4) { Instruction.callNCa16(); }
     else if (opcode == 0xd5) { Instruction.pushDE(cpu); }
-    else if (opcode == 0xd6) { Instruction.subd8(); }
+    else if (opcode == 0xd6) { Instruction.subd8(cpu, mem); }
     else if (opcode == 0xd7) { Instruction.rst10(); }
     else if (opcode == 0xd8) { Instruction.retC(); }
     else if (opcode == 0xd9) { Instruction.reti(); }
-    else if (opcode == 0xda) { Instruction.jpCa16(); }
+    else if (opcode == 0xda) { Instruction.jpCa16(cpu, mem); }
     else if (opcode == 0xdb) { throw new UnsupportedOperationException("Invalid opcode 0xdb"); }
     else if (opcode == 0xdc) { Instruction.callCa16(); }
     else if (opcode == 0xdd) { throw new UnsupportedOperationException("Invalid opcode 0xdd"); }
-    else if (opcode == 0xde) { Instruction.sbcAd8(cpu); }
+    else if (opcode == 0xde) { Instruction.sbcAd8(cpu, mem); }
     else if (opcode == 0xdf) { Instruction.rst18(); }
     
-    else if (opcode == 0xe0) { Instruction.ldha8A(); }
+    else if (opcode == 0xe0) { Instruction.ldha8A(cpu, mem); }
     else if (opcode == 0xe1) { Instruction.popHL(cpu); }
-    else if (opcode == 0xe2) { Instruction.ldaCA(); }
+    else if (opcode == 0xe2) { Instruction.ldaCA(cpu, mem); }
     else if (opcode == 0xe3) { throw new UnsupportedOperationException("Invalid opcode 0xe3"); }
     else if (opcode == 0xe4) { throw new UnsupportedOperationException("Invalid opcode 0xe4"); }
     else if (opcode == 0xe5) { Instruction.pushHL(); }
-    else if (opcode == 0xe6) { Instruction.andd8(); }
+    else if (opcode == 0xe6) { Instruction.andd8(cpu, mem); }
     else if (opcode == 0xe7) { Instruction.rst20(); }
-    else if (opcode == 0xe8) { Instruction.addSPr8(); }
-    else if (opcode == 0xe9) { Instruction.jpaHL(); }
-    else if (opcode == 0xea) { Instruction.lda16A(); }
+    else if (opcode == 0xe8) { Instruction.addSPr8(cpu, mem); }
+    else if (opcode == 0xe9) { Instruction.jpaHL(cpu); }
+    else if (opcode == 0xea) { Instruction.lda16A(cpu, mem); }
     else if (opcode == 0xeb) { throw new UnsupportedOperationException("Invalid opcode 0xeb"); }
     else if (opcode == 0xec) { throw new UnsupportedOperationException("Invalid opcode 0xec"); }
     else if (opcode == 0xed) { throw new UnsupportedOperationException("Invalid opcode 0xed"); }
-    else if (opcode == 0xee) { Instruction.xord8(cpu); }
+    else if (opcode == 0xee) { Instruction.xord8(cpu, mem); }
     else if (opcode == 0xef) { Instruction.rst28(); }
     
-    else if (opcode == 0xf0) { Instruction.ldhAa8(); }
+    else if (opcode == 0xf0) { Instruction.ldhAa8(cpu, mem); }
     else if (opcode == 0xf1) { Instruction.popAF(); }
-    else if (opcode == 0xf2) { Instruction.ldAaC(); }
+    else if (opcode == 0xf2) { Instruction.ldAaC(cpu, mem); }
     else if (opcode == 0xf3) { Instruction.di(); }
     else if (opcode == 0xf4) { throw new UnsupportedOperationException("Invalid opcode 0xf4"); }
     else if (opcode == 0xf5) { Instruction.pushAF(); }
-    else if (opcode == 0xf6) { Instruction.ord8(); }
+    else if (opcode == 0xf6) { Instruction.ord8(cpu, mem); }
     else if (opcode == 0xf7) { Instruction.rst30(); }
-    else if (opcode == 0xf8) { Instruction.ldHLSPr8(); }
-    else if (opcode == 0xf9) { Instruction.ldSPHL(); }
-    else if (opcode == 0xfa) { Instruction.ldAa16(); }
+    else if (opcode == 0xf8) { Instruction.ldHLSPr8(cpu); }
+    else if (opcode == 0xf9) { Instruction.ldSPHL(cpu, mem); }
+    else if (opcode == 0xfa) { Instruction.ldAa16(cpu, mem); }
     else if (opcode == 0xfb) { Instruction.ei(); }
     else if (opcode == 0xfc) { throw new UnsupportedOperationException("Invalid opcode 0xfc"); }
     else if (opcode == 0xfd) { throw new UnsupportedOperationException("Invalid opcode 0xfd"); }
-    else if (opcode == 0xfe) { Instruction.cpd8(); }
+    else if (opcode == 0xfe) { Instruction.cpd8(cpu, mem); }
     else if (opcode == 0xff) { Instruction.rst38(); }
     else { throw new UnsupportedOperationException("Invalid opcode"); }
   }

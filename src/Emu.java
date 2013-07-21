@@ -24,7 +24,7 @@ public class Emu {
   }
   
   public void start() {
-    for (int i = 0; i < 5; i++) {
+    for (int i = 0; i < 15; i++) {
       long s = System.currentTimeMillis();
       Instruction.executeInstr(cpu, mem);
       long e = System.currentTimeMillis();

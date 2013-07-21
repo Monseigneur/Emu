@@ -31,7 +31,6 @@ public class ROMClock {
     
     overflow = false;
     lastTime = startTime;
-    System.out.println("S:" + lastTime);
   }
   
   public void updateClock(long time) {

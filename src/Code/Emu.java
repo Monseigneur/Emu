@@ -1,3 +1,4 @@
+package Code;
 /**
  * 
  * @author milanj91
@@ -6,6 +7,8 @@
  */
 
 public class Emu {
+  public static boolean DEBUG = false;
+  
   private ROM rom;
   private CPU cpu;
   private Memory mem;

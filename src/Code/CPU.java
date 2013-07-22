@@ -5,6 +5,8 @@
  * The GBC CPU
  */
 
+package Code;
+
 public class CPU {
   private static final String FLAGS = "----CHNZ";
   

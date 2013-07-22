@@ -344,9 +344,31 @@ public class TestInstructions {
     int code = 0x18;
     CPU c = new StubCPU();
     StubMemory m = new StubMemory();
-
+    c.changePC(0xff); // Shift PC forward so that the relative jump isn't the same as an abs jump
     m.memSpace[c.getPC()] = code;
-    fail("NYI: 0x18");
+    m.memSpace[c.getPC() + 1] = 0xca;
+    
+    String oldState = c.toString();
+    int oldPC = c.getPC();
+    ISA.executeInstr(c, m);
+    assertEquals(oldPC + 0xffffffca, c.getPC());
+    assertFalse(c.flagZ);
+    assertFalse(c.flagN);
+    assertFalse(c.flagH);
+    assertFalse(c.flagC);
+    
+    c.changePC(0xff); // Shift PC forward so that the relative jump isn't the same as an abs jump
+    m.memSpace[c.getPC()] = code;
+    m.memSpace[c.getPC() + 1] = 0x6a;
+    
+    oldState = c.toString();
+    oldPC = c.getPC();
+    ISA.executeInstr(c, m);
+    assertEquals(oldPC + 0x6a, c.getPC());
+    assertFalse(c.flagZ);
+    assertFalse(c.flagN);
+    assertFalse(c.flagH);
+    assertFalse(c.flagC);
   }
 
   @Test

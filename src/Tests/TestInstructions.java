@@ -54,8 +54,8 @@ public class TestInstructions {
     String oldState = c.toString();
     int oldPC = c.getPC();
     ISA.executeInstr(c, m);
-    assertEquals(c.B, 0xca);
-    assertEquals(c.C, 0xfe);
+    assertEquals(0xca, c.B);
+    assertEquals(0xfe, c.C);
     assertFalse(c.flagZ);
     assertFalse(c.flagN);
     assertFalse(c.flagH);
@@ -77,7 +77,7 @@ public class TestInstructions {
     String oldState = c.toString();
     int oldPC = c.getPC();
     ISA.executeInstr(c, m);
-    assertEquals(c.A, 0xca);
+    assertEquals(0xca, c.A);
     assertEquals(m.memSpace[0xdead], 0xca);
     assertFalse(c.flagZ);
     assertFalse(c.flagN);
@@ -99,8 +99,9 @@ public class TestInstructions {
     String oldState = c.toString();
     int oldPC = c.getPC();
     ISA.executeInstr(c, m);
-    assertEquals(c.B, 0xde);
-    assertEquals(c.C, 0xae);
+    assertEquals(0xde, c.B);
+    assertEquals(0xae, c.C);
+    
     assertFalse(c.flagZ);
     assertFalse(c.flagN);
     assertFalse(c.flagH);
@@ -120,7 +121,8 @@ public class TestInstructions {
     String oldState = c.toString();
     int oldPC = c.getPC();
     ISA.executeInstr(c, m);
-    assertEquals(c.B, 0x00);
+    assertEquals(0x00, c.B);
+    
     assertTrue(c.flagZ);
     assertFalse(c.flagN);
     assertTrue(c.flagH);
@@ -140,7 +142,8 @@ public class TestInstructions {
     String oldState = c.toString();
     int oldPC = c.getPC();
     ISA.executeInstr(c, m);
-    assertEquals(c.B, 0xff);
+    assertEquals(0xff, c.B);
+    
     assertFalse(c.flagZ);
     assertTrue(c.flagN);
     assertTrue(c.flagH);
@@ -160,7 +163,7 @@ public class TestInstructions {
     String oldState = c.toString();
     int oldPC = c.getPC();
     ISA.executeInstr(c, m);
-    assertEquals(c.B, 0xca);
+    assertEquals(0xca, c.B);
     
     assertFalse(c.flagZ);
     assertFalse(c.flagN);
@@ -176,7 +179,19 @@ public class TestInstructions {
     StubMemory m = new StubMemory();
 
     m.memSpace[c.getPC()] = code;
-    fail("NYI: 0x07");
+    c.A = 0xca;
+    c.flagC = false;
+    
+    String oldState = c.toString();
+    int oldPC = c.getPC();
+    ISA.executeInstr(c, m);
+    assertEquals(0x95, c.A);
+    
+    assertFalse(c.flagZ);
+    assertFalse(c.flagN);
+    assertFalse(c.flagH);
+    assertTrue(c.flagC);
+    assertEquals(oldPC + INSTR_LEN[code], c.getPC());
   }
 
   @Test
@@ -186,7 +201,21 @@ public class TestInstructions {
     StubMemory m = new StubMemory();
 
     m.memSpace[c.getPC()] = code;
-    fail("NYI: 0x08");
+    m.memSpace[c.getPC() + 1] = 0x00;
+    m.memSpace[c.getPC() + 2] = 0xc1;
+    c.sp = 0xfff8;
+    
+    String oldState = c.toString();
+    int oldPC = c.getPC();
+    ISA.executeInstr(c, m);
+    assertEquals(0xf8, m.memSpace[0xc100]);
+    assertEquals(0xff, m.memSpace[0xc101]);
+    
+    assertFalse(c.flagZ);
+    assertFalse(c.flagN);
+    assertFalse(c.flagH);
+    assertFalse(c.flagC);
+    assertEquals(oldPC + INSTR_LEN[code], c.getPC());
   }
 
   @Test
@@ -196,7 +225,24 @@ public class TestInstructions {
     StubMemory m = new StubMemory();
 
     m.memSpace[c.getPC()] = code;
-    fail("NYI: 0x09");
+    c.H = 0xca;
+    c.L = 0xfe;
+    c.B = 0xde;
+    c.C = 0xad;
+    
+    String oldState = c.toString();
+    int oldPC = c.getPC();
+    ISA.executeInstr(c, m);
+    assertEquals(0xde, c.B);
+    assertEquals(0xad, c.C);
+    assertEquals(0xa9, c.H);
+    assertEquals(0xab, c.L);
+    
+    assertFalse(c.flagZ);
+    assertFalse(c.flagN);
+    assertTrue(c.flagH);
+    assertTrue(c.flagC);
+    assertEquals(oldPC + INSTR_LEN[code], c.getPC());
   }
 
   @Test
@@ -206,7 +252,20 @@ public class TestInstructions {
     StubMemory m = new StubMemory();
 
     m.memSpace[c.getPC()] = code;
-    fail("NYI: 0x0a");
+    c.B = 0xca;
+    c.C = 0xfe;
+    m.memSpace[0xcafe] = 0xde;
+    
+    String oldState = c.toString();
+    int oldPC = c.getPC();
+    ISA.executeInstr(c, m);
+    assertEquals(0xde, c.A);
+    
+    assertFalse(c.flagZ);
+    assertFalse(c.flagN);
+    assertFalse(c.flagH);
+    assertFalse(c.flagC);
+    assertEquals(oldPC + INSTR_LEN[code], c.getPC());
   }
 
   @Test
@@ -216,7 +275,20 @@ public class TestInstructions {
     StubMemory m = new StubMemory();
 
     m.memSpace[c.getPC()] = code;
-    fail("NYI: 0x0b");
+    c.B = 0xca;
+    c.C = 0xfe;
+    
+    String oldState = c.toString();
+    int oldPC = c.getPC();
+    ISA.executeInstr(c, m);
+    assertEquals(0xca, c.B);
+    assertEquals(0xfd, c.C);
+    
+    assertFalse(c.flagZ);
+    assertFalse(c.flagN);
+    assertFalse(c.flagH);
+    assertFalse(c.flagC);
+    assertEquals(oldPC + INSTR_LEN[code], c.getPC());
   }
 
   @Test
@@ -226,7 +298,18 @@ public class TestInstructions {
     StubMemory m = new StubMemory();
 
     m.memSpace[c.getPC()] = code;
-    fail("NYI: 0x0c");
+    c.C = 0xca;
+    
+    String oldState = c.toString();
+    int oldPC = c.getPC();
+    ISA.executeInstr(c, m);
+    assertEquals(0xcb, c.C);
+    
+    assertFalse(c.flagZ);
+    assertFalse(c.flagN);
+    assertFalse(c.flagH);
+    assertFalse(c.flagC);
+    assertEquals(oldPC + INSTR_LEN[code], c.getPC());
   }
 
   @Test
@@ -236,7 +319,18 @@ public class TestInstructions {
     StubMemory m = new StubMemory();
 
     m.memSpace[c.getPC()] = code;
-    fail("NYI: 0x0d");
+    c.C = 0xca;
+    
+    String oldState = c.toString();
+    int oldPC = c.getPC();
+    ISA.executeInstr(c, m);
+    assertEquals(0xc9, c.C);
+    
+    assertFalse(c.flagZ);
+    assertTrue(c.flagN);
+    assertFalse(c.flagH);
+    assertFalse(c.flagC);
+    assertEquals(oldPC + INSTR_LEN[code], c.getPC());
   }
 
   @Test
@@ -246,7 +340,18 @@ public class TestInstructions {
     StubMemory m = new StubMemory();
 
     m.memSpace[c.getPC()] = code;
-    fail("NYI: 0x0e");
+    m.memSpace[c.getPC() + 1] = 0xca;
+    
+    String oldState = c.toString();
+    int oldPC = c.getPC();
+    ISA.executeInstr(c, m);
+    assertEquals(0xca, c.C);
+    
+    assertFalse(c.flagZ);
+    assertFalse(c.flagN);
+    assertFalse(c.flagH);
+    assertFalse(c.flagC);
+    assertEquals(oldPC + INSTR_LEN[code], c.getPC());   
   }
 
   @Test
@@ -256,7 +361,19 @@ public class TestInstructions {
     StubMemory m = new StubMemory();
 
     m.memSpace[c.getPC()] = code;
-    fail("NYI: 0x0f");
+    c.A = 0xca;
+    c.flagC = false;
+    
+    String oldState = c.toString();
+    int oldPC = c.getPC();
+    ISA.executeInstr(c, m);
+    assertEquals(0x65, c.A);
+    
+    assertFalse(c.flagZ);
+    assertFalse(c.flagN);
+    assertFalse(c.flagH);
+    assertFalse(c.flagC);
+    assertEquals(oldPC + INSTR_LEN[code], c.getPC());
   }
 
   @Test
@@ -266,7 +383,14 @@ public class TestInstructions {
     StubMemory m = new StubMemory();
 
     m.memSpace[c.getPC()] = code;
-    fail("NYI: 0x10");
+    String oldState = c.toString();
+    int oldPC = c.getPC();
+    ISA.executeInstr(c, m);
+    assertFalse(c.flagZ);
+    assertFalse(c.flagN);
+    assertFalse(c.flagH);
+    assertFalse(c.flagC);
+    assertEquals(oldPC + INSTR_LEN[code], c.getPC());
   }
 
   @Test
@@ -276,7 +400,19 @@ public class TestInstructions {
     StubMemory m = new StubMemory();
 
     m.memSpace[c.getPC()] = code;
-    fail("NYI: 0x11");
+    m.memSpace[c.getPC() + 1] = 0xfe;
+    m.memSpace[c.getPC() + 2] = 0xca;
+    
+    String oldState = c.toString();
+    int oldPC = c.getPC();
+    ISA.executeInstr(c, m);
+    assertEquals(0xca, c.D);
+    assertEquals(0xfe, c.E);
+    assertFalse(c.flagZ);
+    assertFalse(c.flagN);
+    assertFalse(c.flagH);
+    assertFalse(c.flagC);
+    assertEquals(oldPC + INSTR_LEN[code], c.getPC());
   }
 
   @Test
@@ -286,7 +422,20 @@ public class TestInstructions {
     StubMemory m = new StubMemory();
 
     m.memSpace[c.getPC()] = code;
-    fail("NYI: 0x12");
+    c.A = 0xca;
+    c.D = 0xde;
+    c.E = 0xad;
+    
+    String oldState = c.toString();
+    int oldPC = c.getPC();
+    ISA.executeInstr(c, m);
+    assertEquals(0xca, c.A);
+    assertEquals(0xca, m.memSpace[0xdead]);
+    assertFalse(c.flagZ);
+    assertFalse(c.flagN);
+    assertFalse(c.flagH);
+    assertFalse(c.flagC);
+    assertEquals(oldPC + INSTR_LEN[code], c.getPC());
   }
 
   @Test
@@ -296,7 +445,20 @@ public class TestInstructions {
     StubMemory m = new StubMemory();
 
     m.memSpace[c.getPC()] = code;
-    fail("NYI: 0x13");
+    c.D = 0xde;
+    c.E = 0xad;
+    
+    String oldState = c.toString();
+    int oldPC = c.getPC();
+    ISA.executeInstr(c, m);
+    assertEquals(0xde, c.D);
+    assertEquals(0xae, c.E);
+    
+    assertFalse(c.flagZ);
+    assertFalse(c.flagN);
+    assertFalse(c.flagH);
+    assertFalse(c.flagC);
+    assertEquals(oldPC + INSTR_LEN[code], c.getPC());
   }
 
   @Test
@@ -306,7 +468,18 @@ public class TestInstructions {
     StubMemory m = new StubMemory();
 
     m.memSpace[c.getPC()] = code;
-    fail("NYI: 0x14");
+    c.D = 0xff;
+    
+    String oldState = c.toString();
+    int oldPC = c.getPC();
+    ISA.executeInstr(c, m);
+    assertEquals(0x00, c.D);
+    
+    assertTrue(c.flagZ);
+    assertFalse(c.flagN);
+    assertTrue(c.flagH);
+    assertFalse(c.flagC);
+    assertEquals(oldPC + INSTR_LEN[code], c.getPC());
   }
 
   @Test
@@ -316,7 +489,18 @@ public class TestInstructions {
     StubMemory m = new StubMemory();
 
     m.memSpace[c.getPC()] = code;
-    fail("NYI: 0x15");
+    c.D = 0x00;
+    
+    String oldState = c.toString();
+    int oldPC = c.getPC();
+    ISA.executeInstr(c, m);
+    assertEquals(0xff, c.D);
+    
+    assertFalse(c.flagZ);
+    assertTrue(c.flagN);
+    assertTrue(c.flagH);
+    assertFalse(c.flagC);
+    assertEquals(oldPC + INSTR_LEN[code], c.getPC());
   }
 
   @Test
@@ -326,7 +510,18 @@ public class TestInstructions {
     StubMemory m = new StubMemory();
 
     m.memSpace[c.getPC()] = code;
-    fail("NYI: 0x16");
+    m.memSpace[c.getPC() + 1] = 0xca;
+    
+    String oldState = c.toString();
+    int oldPC = c.getPC();
+    ISA.executeInstr(c, m);
+    assertEquals(0xca, c.D);
+    
+    assertFalse(c.flagZ);
+    assertFalse(c.flagN);
+    assertFalse(c.flagH);
+    assertFalse(c.flagC);
+    assertEquals(oldPC + INSTR_LEN[code], c.getPC());
   }
 
   @Test
@@ -336,7 +531,19 @@ public class TestInstructions {
     StubMemory m = new StubMemory();
 
     m.memSpace[c.getPC()] = code;
-    fail("NYI: 0x17");
+    c.A = 0xca;
+    c.flagC = false;
+    
+    String oldState = c.toString();
+    int oldPC = c.getPC();
+    ISA.executeInstr(c, m);
+    assertEquals(0x94, c.A);
+    
+    assertFalse(c.flagZ);
+    assertFalse(c.flagN);
+    assertFalse(c.flagH);
+    assertTrue(c.flagC);
+    assertEquals(oldPC + INSTR_LEN[code], c.getPC());
   }
 
   @Test
@@ -378,7 +585,24 @@ public class TestInstructions {
     StubMemory m = new StubMemory();
 
     m.memSpace[c.getPC()] = code;
-    fail("NYI: 0x19");
+    c.H = 0xca;
+    c.L = 0xfe;
+    c.D = 0xde;
+    c.E = 0xad;
+    
+    String oldState = c.toString();
+    int oldPC = c.getPC();
+    ISA.executeInstr(c, m);
+    assertEquals(0xde, c.D);
+    assertEquals(0xad, c.E);
+    assertEquals(0xa9, c.H);
+    assertEquals(0xab, c.L);
+    
+    assertFalse(c.flagZ);
+    assertFalse(c.flagN);
+    assertTrue(c.flagH);
+    assertTrue(c.flagC);
+    assertEquals(oldPC + INSTR_LEN[code], c.getPC());
   }
 
   @Test
@@ -388,7 +612,20 @@ public class TestInstructions {
     StubMemory m = new StubMemory();
 
     m.memSpace[c.getPC()] = code;
-    fail("NYI: 0x1a");
+    c.D = 0xca;
+    c.E = 0xfe;
+    m.memSpace[0xcafe] = 0xde;
+    
+    String oldState = c.toString();
+    int oldPC = c.getPC();
+    ISA.executeInstr(c, m);
+    assertEquals(0xde, c.A);
+    
+    assertFalse(c.flagZ);
+    assertFalse(c.flagN);
+    assertFalse(c.flagH);
+    assertFalse(c.flagC);
+    assertEquals(oldPC + INSTR_LEN[code], c.getPC());
   }
 
   @Test
@@ -398,7 +635,20 @@ public class TestInstructions {
     StubMemory m = new StubMemory();
 
     m.memSpace[c.getPC()] = code;
-    fail("NYI: 0x1b");
+    c.D = 0xca;
+    c.E = 0xfe;
+    
+    String oldState = c.toString();
+    int oldPC = c.getPC();
+    ISA.executeInstr(c, m);
+    assertEquals(0xca, c.D);
+    assertEquals(0xfd, c.E);
+    
+    assertFalse(c.flagZ);
+    assertFalse(c.flagN);
+    assertFalse(c.flagH);
+    assertFalse(c.flagC);
+    assertEquals(oldPC + INSTR_LEN[code], c.getPC());
   }
 
   @Test
@@ -408,7 +658,18 @@ public class TestInstructions {
     StubMemory m = new StubMemory();
 
     m.memSpace[c.getPC()] = code;
-    fail("NYI: 0x1c");
+    c.E = 0xca;
+    
+    String oldState = c.toString();
+    int oldPC = c.getPC();
+    ISA.executeInstr(c, m);
+    assertEquals(0xcb, c.E);
+    
+    assertFalse(c.flagZ);
+    assertFalse(c.flagN);
+    assertFalse(c.flagH);
+    assertFalse(c.flagC);
+    assertEquals(oldPC + INSTR_LEN[code], c.getPC());
   }
 
   @Test
@@ -418,7 +679,18 @@ public class TestInstructions {
     StubMemory m = new StubMemory();
 
     m.memSpace[c.getPC()] = code;
-    fail("NYI: 0x1d");
+    c.E = 0xca;
+    
+    String oldState = c.toString();
+    int oldPC = c.getPC();
+    ISA.executeInstr(c, m);
+    assertEquals(0xc9, c.E);
+    
+    assertFalse(c.flagZ);
+    assertTrue(c.flagN);
+    assertFalse(c.flagH);
+    assertFalse(c.flagC);
+    assertEquals(oldPC + INSTR_LEN[code], c.getPC());
   }
 
   @Test
@@ -428,7 +700,18 @@ public class TestInstructions {
     StubMemory m = new StubMemory();
 
     m.memSpace[c.getPC()] = code;
-    fail("NYI: 0x1e");
+    m.memSpace[c.getPC() + 1] = 0xca;
+    
+    String oldState = c.toString();
+    int oldPC = c.getPC();
+    ISA.executeInstr(c, m);
+    assertEquals(0xca, c.E);
+    
+    assertFalse(c.flagZ);
+    assertFalse(c.flagN);
+    assertFalse(c.flagH);
+    assertFalse(c.flagC);
+    assertEquals(oldPC + INSTR_LEN[code], c.getPC());
   }
 
   @Test
@@ -438,7 +721,19 @@ public class TestInstructions {
     StubMemory m = new StubMemory();
 
     m.memSpace[c.getPC()] = code;
-    fail("NYI: 0x1f");
+    c.A = 0xca;
+    c.flagC = true;
+    
+    String oldState = c.toString();
+    int oldPC = c.getPC();
+    ISA.executeInstr(c, m);
+    assertEquals(0xe5, c.A);
+    
+    assertFalse(c.flagZ);
+    assertFalse(c.flagN);
+    assertFalse(c.flagH);
+    assertFalse(c.flagC);
+    assertEquals(oldPC + INSTR_LEN[code], c.getPC());
   }
 
   @Test

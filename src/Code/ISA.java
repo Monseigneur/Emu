@@ -90,9 +90,10 @@ public class ISA {
     
     // 08 LD (a16),SP
     private static void lda16SP(CPU cpu, Memory mem) {
-      int addr = (mem.readMem(cpu.getPC() + 1) & 0xff) | ((cpu.getPC() + 2) & 0xff) << 8;
-      mem.writeMem((cpu.sp >> 8) & 0xff, addr);
-      mem.writeMem(cpu.sp & 0xff, addr + 1);
+      int addr = (mem.readMem(cpu.getPC() + 1) & 0xff) | (mem.readMem(cpu.getPC() + 2) & 0xff) << 8;
+      mem.writeMem(cpu.sp & 0xff, addr);
+      mem.writeMem((cpu.sp >> 8) & 0xff, addr + 1);
+      cpu.incPC(INSTR_LEN[0x08]);
     }
     
     // 09 ADD HL,BC
@@ -179,8 +180,8 @@ public class ISA {
     // 13 INC DE [- - - -]
     private static void incDE(CPU cpu) {
       int val = ((cpu.D << 8) | cpu.E) + 1;
-      cpu.D = (val >> 8) & 0x0f;
-      cpu.E = val & 0x0f;
+      cpu.D = (val >> 8) & 0xff;
+      cpu.E = val & 0xff;
       cpu.incPC(INSTR_LEN[0x13]);
     }
     

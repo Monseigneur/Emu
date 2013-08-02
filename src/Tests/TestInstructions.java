@@ -3586,16 +3586,6 @@ public class TestInstructions {
   }
 
   @Test
-  public void test_d3() {
-    int code = 0xd3;
-    CPU c = new StubCPU();
-    StubMemory m = new StubMemory();
-
-    m.memSpace[c.getPC()] = code;
-    fail("NYI: 0xd3");
-  }
-
-  @Test
   public void test_d4() {
     int code = 0xd4;
     CPU c = new StubCPU();
@@ -3666,16 +3656,6 @@ public class TestInstructions {
   }
 
   @Test
-  public void test_db() {
-    int code = 0xdb;
-    CPU c = new StubCPU();
-    StubMemory m = new StubMemory();
-
-    m.memSpace[c.getPC()] = code;
-    fail("NYI: 0xdb");
-  }
-
-  @Test
   public void test_dc() {
     int code = 0xdc;
     CPU c = new StubCPU();
@@ -3683,16 +3663,6 @@ public class TestInstructions {
 
     m.memSpace[c.getPC()] = code;
     fail("NYI: 0xdc");
-  }
-
-  @Test
-  public void test_dd() {
-    int code = 0xdd;
-    CPU c = new StubCPU();
-    StubMemory m = new StubMemory();
-
-    m.memSpace[c.getPC()] = code;
-    fail("NYI: 0xdd");
   }
 
   @Test
@@ -3743,26 +3713,6 @@ public class TestInstructions {
 
     m.memSpace[c.getPC()] = code;
     fail("NYI: 0xe2");
-  }
-
-  @Test
-  public void test_e3() {
-    int code = 0xe3;
-    CPU c = new StubCPU();
-    StubMemory m = new StubMemory();
-
-    m.memSpace[c.getPC()] = code;
-    fail("NYI: 0xe3");
-  }
-
-  @Test
-  public void test_e4() {
-    int code = 0xe4;
-    CPU c = new StubCPU();
-    StubMemory m = new StubMemory();
-
-    m.memSpace[c.getPC()] = code;
-    fail("NYI: 0xe4");
   }
 
   @Test
@@ -3826,36 +3776,6 @@ public class TestInstructions {
   }
 
   @Test
-  public void test_eb() {
-    int code = 0xeb;
-    CPU c = new StubCPU();
-    StubMemory m = new StubMemory();
-
-    m.memSpace[c.getPC()] = code;
-    fail("NYI: 0xeb");
-  }
-
-  @Test
-  public void test_ec() {
-    int code = 0xec;
-    CPU c = new StubCPU();
-    StubMemory m = new StubMemory();
-
-    m.memSpace[c.getPC()] = code;
-    fail("NYI: 0xec");
-  }
-
-  @Test
-  public void test_ed() {
-    int code = 0xed;
-    CPU c = new StubCPU();
-    StubMemory m = new StubMemory();
-
-    m.memSpace[c.getPC()] = code;
-    fail("NYI: 0xed");
-  }
-
-  @Test
   public void test_ee() {
     int code = 0xee;
     CPU c = new StubCPU();
@@ -3913,16 +3833,6 @@ public class TestInstructions {
 
     m.memSpace[c.getPC()] = code;
     fail("NYI: 0xf3");
-  }
-
-  @Test
-  public void test_f4() {
-    int code = 0xf4;
-    CPU c = new StubCPU();
-    StubMemory m = new StubMemory();
-
-    m.memSpace[c.getPC()] = code;
-    fail("NYI: 0xf4");
   }
 
   @Test
@@ -3993,26 +3903,6 @@ public class TestInstructions {
 
     m.memSpace[c.getPC()] = code;
     fail("NYI: 0xfb");
-  }
-
-  @Test
-  public void test_fc() {
-    int code = 0xfc;
-    CPU c = new StubCPU();
-    StubMemory m = new StubMemory();
-
-    m.memSpace[c.getPC()] = code;
-    fail("NYI: 0xfc");
-  }
-
-  @Test
-  public void test_fd() {
-    int code = 0xfd;
-    CPU c = new StubCPU();
-    StubMemory m = new StubMemory();
-
-    m.memSpace[c.getPC()] = code;
-    fail("NYI: 0xfd");
   }
 
   @Test

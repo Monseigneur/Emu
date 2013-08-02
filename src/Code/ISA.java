@@ -475,6 +475,9 @@ public class ISA {
       int val = mem.readMem(addr) & 0xff;
       val = (val + 1) & 0xff;
       mem.writeMem(val & 0xff, addr);
+      cpu.flagZ = (val == 0);
+      cpu.flagN = false;
+      cpu.flagH = ((val & 0xff) == 0);
       cpu.incPC(INSTR_LEN[0x34]);
     }
     
@@ -484,6 +487,9 @@ public class ISA {
       int val = mem.readMem(addr) & 0xff;
       val = (val - 1) & 0xff;
       mem.writeMem(val & 0xff, addr);
+      cpu.flagZ = (val == 0);
+      cpu.flagN = true;
+      cpu.flagH = ((val & 0x0f) == 0x0f);
       cpu.incPC(INSTR_LEN[0x35]);
     }
     
